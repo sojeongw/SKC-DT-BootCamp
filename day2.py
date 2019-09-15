@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f60a939... 필기 수정
 # -*- coding: utf-8 -*-
 """
 Created on Tue Sep 10 08:41:47 2019
@@ -349,6 +352,7 @@ s1.columns
 # variable과 value 이름은 지정해줄 수 있다.
 melt1=pd.melt(s1, "A", ["C","E"], var_name="class", value_name="avg")
 melt1
+<<<<<<< HEAD
 =======
 # -*- coding: utf-8 -*-
 """
@@ -701,3 +705,5 @@ s1.columns
 melt1=pd.melt(s1, "A", ["C","E"], var_name="class", value_name="avg")
 melt1
 >>>>>>> 20b164d... day 2
+=======
+>>>>>>> f60a939... 필기 수정
