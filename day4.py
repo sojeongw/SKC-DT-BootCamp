@@ -219,7 +219,174 @@ plt.plot(x, y, "gD")
 plt.plot(x, y2, "r:")
 
 # 아래의 방법 둘 다 가능한데 주로 후자처럼 color가 맨 앞에 오는 걸 많이 쓴다.
-# fmt = "[marker][line][color]
-# fmt = "[color][line][marker]
+# fmt = "[marker][line][color]"
+# fmt = "[color][line][marker]"
 
 # =============================================================================
+
+# =============================================================================
+# scatter plot
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+salary=pd.read_csv("https://raw.githubusercontent.com/duchesnay/pylearn-doc/master/data/salary_table.csv")
+
+# 불러온 csv의 experience, salary column을 각각 x, y축으로 그래프로 출력한다.
+# o 옵션을 주면 scatter plot이 된다.
+# 아래의 그래프처럼 x값이 증가할 때 y값도 증가하면 양의 상관이라고 한다.
+# 상황에 따라 양의 상관이 좋을 수도, 음의 상관이 좋을 수도 있다.
+# 조율을 위해서 양과 음 둘 다 표현하는 것도 좋다.
+plt.plot(salary["experience"],
+         salary["salary"], "o")
+
+# 위의 그래프는 양의 상관이 존재한다는 것만 알 수 있다. 그룹에 따라 양의 상관인지 알아보자.
+# 먼저 변수명을 확인한다.
+salary.columns
+# education에서 어떤 요소가 있는지 확인한다.
+edu=salary["education"].unique()
+# edu에 담아 각 education 요소를 불러올 수 있게 되었다.
+edu[0]
+# edu 요소에 따라 색상을 설정한다.
+col1=np.where(salary.education==edu[0], 'r', 
+    np.where(salary.education==edu[1], 'b', 'k'))
+
+# 설정한 색을 적용해준다. 색이 single로 들어갈땐 plot으로 적용해도 되나, sequence로 쓰려면 특정 plot(scatter 등)으로 설정해줘야 한다.
+plt.scatter(salary["experience"],
+         salary["salary"], color=col1)
+
+# 또다른 방법: 각각의 x값이 넘어올 때마다 col2를 적용한 c1을 만든다.
+col2={edu[0]:'r', edu[1]:'b', edu[2]:'k'}
+# series 단위의 apply는 개별 값이 되고, dataframe의 apply는 열이 된다.
+c2=salary["education"].apply(lambda x: col2[x])
+plt.scatter(salary["experience"],
+         salary["salary"], color=c2)
+
+# =============================================================================
+
+# =============================================================================
+# box plot: 이상치를 쉽게 찾아낼 수 있음.
+# 미리 만들어진 팔레트를 사용할 수 있다.
+# =============================================================================
+
+# =============================================================================
+# heap map
+
+# 이항 분포: 결과가 둘 중 하나인 것이 여러 번 일어날 때의 분포. 동전 앞뒤, yes or no 등.
+# 5*5의 난수 생성
+np.random.random([5, 5])
+np.random.randn(5,5)    # 표준 정규 분포로 생성됨
+# 표준 정규 분포: 95프로(2 시그마) 이내에 들어가 있는 것이 정규 분포.
+# 분포 함수: 정규 분포의 제일 가운데 높이를 구하는 것
+# =============================================================================
+
+import scipy.stats as st
+
+# 평균 60을 기준으로 95%에 해당하는 값을 구해보자. 간격에 대한 표준 편차는 4.
+# 평균에 대한 높이와
+# norm(): 정규분포 호출
+n1=st.norm
+
+# cdf(해당 좌표, 평균, 표준편차): 누적 확률. 맨 앞부터 특정 좌표까지의 누적된 확률
+# pmf:
+# pdf:
+# ppf: 데드라인의 포인트
+
+n1.ppf(0.95,70,5)
+
+# 70에서 75 사이의 확률을 구하고 싶다면
+n1.pdf(70, 75, 60, 4)
+
+# 연속형은 pdf가 아니라 cdf를 사용한다.
+n1.cdf(75, 60, 4) - n1.cdf(70, 60, 4)
+
+
+
+n1.st.norm.stats(loc=60, scale=4, moments="mvsk")
+
+n1.cdf(4)
+# 상위 5프로에 대한 값
+n1.ppf(0.95, 60, 4)
+n1.ppf(0.025)*4+60
+# ppf(확률): 해당 확률의 표준 정규 분포 상 좌표값 리턴
+
+n2=st.binom
+# 주사위 예제: 내가 관심갖는 숫자 3개, n의 개수 5, 확률 1/6
+# 발생할 확률이 0.032인것
+n2.pmf(3, 5, 1/6)
+
+
+
+
+
+#=======시험========
+
+import numpy as np
+test=[5, 6, 4, 7, 7, 12, 8]
+np.median(test)
+np.mean(test)
+np.mode(test)
+# mode는 pandas에 있다.
+import pandas as pd
+
+# 강제적으로 dataframe이나 series 값으로 변환해야 한다.
+# Series()로 강제적으로 한 열로 들어가게 한다.
+pd.Series(test).mean()
+a2=pd.Series(test)
+
+a2.mean()
+a2.median()
+a2.mode() 
+
+n1.cdf(3.5, 2.8, 0.5) - n1.cdf(3.3, 2.8, 0.5)
+n2.pmf(2, 5, 0.4)
+
+# =============================================================================
+# 
+# # 피봇테이블: pandas에서 각각의 집계를 내주는 함수.
+# # 201704와 201804에 있는 것만 isin()으로 가져온다.
+# user.columns
+# user["대여일자"].value_counts()
+# date_list=[201704, 201804]
+# con1=user["대여일자"].isin(date_list)
+# con1
+# 
+# # 대여일자와 대여소번호를 기준으로 이동거리를 가져온다.
+# gp_list=["대여일자","대여소번호"]
+# Q2=user[con1].groupby(gp_list)["이동거리(M)"].mean()
+# 
+# Q2.shape
+# Q2_1=Q2.index.to_frame()
+# Q2_1.head()
+# Q2_2=pd.concat([Q2_1, Q2], axis=1)
+# Q2_2.head()
+# Q2_2.columns
+# 
+# Q2_3=Q2_2[Q2_2["대여일자"] == 201704]
+# Q2_4=Q2_2[Q2_2["대여일자"] == 201804]
+# # 지금 사용하는 index가 동일하지 않아서 연결되지 않는다.
+# # 기존 index를 제거하고 다시 정의해줘야 한다.
+# Q2_f=pd.merge(Q2_3, Q2_4, on="대여소번호", left_index=False, right_index=False) 
+# 
+# # 이렇게 고려해야 하는 점이 많기 때문에 피봇을 사용한다.  
+# Q2_f=pd.pivot_table(user[user["대여일자"].isin(date_list)],
+#                     index="대여소번호",
+#                     columns="대여일자",
+#                     values="이동거리(M)")
+# # NaN 정리
+# Q2_f=Q2_f.dropna()
+# =============================================================================
+
+sleep=pd.read_csv("dataset/sleep.csv")
+group_list=[1,2]
+data1 = sleep['group'].isin(group_list)
+id_list=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+data2=sleep[data1].groupby(sleep['ID'])
+
+
+result = pd.pivot_table(sleep[sleep['group'].isin(group_list)],
+                          index='ID',
+                          columns='group',
+                          values='extra')
+
+st.ttest_ind(result[1], result[2])
