@@ -43,7 +43,8 @@ b7[::-1]    #역순으로 나열
 # b7>5리스트에서는 더하기와 곱하기만 가능  
 a1>5
 
-c3=b7.copy()
+c3=b7   # 같은 주소값을 참조하므로 b7이 바뀌면 같이 바뀐다.
+c3=b7.copy()    # 내용만 복사하고 다른 주소를 갖는다.
 c3
 b7.append(5)
 b7
@@ -55,7 +56,7 @@ b8="abaacdf"
 b8[0]   #string 한 글자 한 글자가 배열 한 칸으로 인식됨
 b8.count("a")
 
-# {키:값}는 dict()과 같다. 값에는 리스트, 튜플, 딕셔너리 다 들어갈 수 있다.
+# {키:값}는 dict()과 같다. 값에는 리스트[], 튜플(), 딕셔너리{:} 다 들어갈 수 있다.
 d1={"Age":[3,5,9], "Height":[150,160,180]}
 type(d1)    # dict
 # d1[0] 숫자로 접근 불가
@@ -68,7 +69,7 @@ d1.items()  # dict_items([('Age', [3, 5, 9]), ('Height', [150, 160, 180])])
 # 패키지 전체 불러오기
 # import func1
 
-# 특정 함수만 가져오 
+# 특정 함수만 가져오기
 from func1 import add1, add2
 
 add1(3,4)
@@ -82,8 +83,8 @@ b7>5  # not supported between instances of 'list' and 'int'
 b7[0]>5
 f1>5  # array([False, False,  True,  True, False])
 
-sum(b7)
-sum(f1)
+sum(b7)     # 41
+sum(f1)     # 41
 type(b7)  # list
 type(f1)  # numpy.ndarray
 
@@ -93,14 +94,15 @@ f2[0]   # array([2, 5, 7])
 f2[0][1]  # 5
 f2[0,1]   # 5
 
-f1[f1>5]  # array([7, 9])
+f1>5    # 각 요소 별로 true/false인지만 출력
+f1[f1>5]  # array([7, 9]) 대괄호에 넣으면 직접적인 리스트를 출력
 np.sum(f2, 0)   # array([ 7, 11,  9]) axis 옵션을 0으로 하면 열 방향으로
 np.sum(f2, 1)   # array([14, 13]) axis 옵션을 1로 하면 행 방향으로 
 
 np.argmax(f2, 0)  # array([1, 1, 0], dtype=int64) 열 방향으로 최대값이 있는 위치값 리턴 
 
 # if 함수
-# np.where(조건, 참인 경우 실행할 내용, 거짓인 경우 실행할 내용)
+# np.where(조건, 참인 경우 채울 내용, 거짓인 경우 채울 내용)
 f1  # array([2, 4, 7, 9, 3])
 f3=np.where(f1>5, 1, 0)  
 f3  # array([0, 0, 1, 1, 0])
@@ -123,4 +125,6 @@ f2=f2.reshape(3,2)  # 적용하려면 다시 assign 해줘야 한다.
 f2[0]   # 할당 전 array([2, 5, 7]) / 할당 후 array([2, 5])
 
 np.ones(10) # array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]) 자리를 1로 채우겠다.
+# a부터 b까지 c단계로 나눈다.
 np.linspace(0, 1, 5)  # array([0.  , 0.25, 0.5 , 0.75, 1.  ])
+np.linspace(0, 10, 3)
