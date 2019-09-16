@@ -222,4 +222,6 @@ plt.plot(x, y2, "r:")
 # fmt = "[marker][line][color]
 # fmt = "[color][line][marker]
 
+plt.plot(x, y, "gD", )
+
 # =============================================================================
