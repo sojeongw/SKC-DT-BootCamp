@@ -341,41 +341,7 @@ a2.mode()
 n1.cdf(3.5, 2.8, 0.5) - n1.cdf(3.3, 2.8, 0.5)
 n2.pmf(2, 5, 0.4)
 
-# =============================================================================
-# 
-# # 피봇테이블: pandas에서 각각의 집계를 내주는 함수.
-# # 201704와 201804에 있는 것만 isin()으로 가져온다.
-# user.columns
-# user["대여일자"].value_counts()
-# date_list=[201704, 201804]
-# con1=user["대여일자"].isin(date_list)
-# con1
-# 
-# # 대여일자와 대여소번호를 기준으로 이동거리를 가져온다.
-# gp_list=["대여일자","대여소번호"]
-# Q2=user[con1].groupby(gp_list)["이동거리(M)"].mean()
-# 
-# Q2.shape
-# Q2_1=Q2.index.to_frame()
-# Q2_1.head()
-# Q2_2=pd.concat([Q2_1, Q2], axis=1)
-# Q2_2.head()
-# Q2_2.columns
-# 
-# Q2_3=Q2_2[Q2_2["대여일자"] == 201704]
-# Q2_4=Q2_2[Q2_2["대여일자"] == 201804]
-# # 지금 사용하는 index가 동일하지 않아서 연결되지 않는다.
-# # 기존 index를 제거하고 다시 정의해줘야 한다.
-# Q2_f=pd.merge(Q2_3, Q2_4, on="대여소번호", left_index=False, right_index=False) 
-# 
-# # 이렇게 고려해야 하는 점이 많기 때문에 피봇을 사용한다.  
-# Q2_f=pd.pivot_table(user[user["대여일자"].isin(date_list)],
-#                     index="대여소번호",
-#                     columns="대여일자",
-#                     values="이동거리(M)")
-# # NaN 정리
-# Q2_f=Q2_f.dropna()
-# =============================================================================
+import scipy.stats as st
 
 sleep=pd.read_csv("dataset/sleep.csv")
 group_list=[1,2]
@@ -389,4 +355,4 @@ result = pd.pivot_table(sleep[sleep['group'].isin(group_list)],
                           columns='group',
                           values='extra')
 
-st.ttest_ind(result[1], result[2])
+st.ttest_rel(result[1], result[2])
