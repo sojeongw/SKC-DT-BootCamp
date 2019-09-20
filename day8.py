@@ -263,6 +263,7 @@ from sklearn.decomposition import PCA
 
 # 5개를 가지고 변수 축약 기법을 실행한다.
 pca1 = PCA(n_components=5)
+# pca1 = PCA(n_components=8)
 
 # tr_xs에 적용한다.
 pca1.fit(tr_xs)
@@ -271,7 +272,10 @@ pca1.fit(tr_xs)
 pca1.components_
 # [[ 0.14058577, -0.20666103,  0.33643462,  0.01211327,  0.30343206,
 #         -0.07883427,  0.33377618, -0.21349436,  0.49618136,  0.4693754 ,
-#          0.17313515, -0.16840888,  0.20993595],
+#          0.17313515, -0.16840888,  0.20993595], 
+# -> 이 한 칸에 여러 벡터가 있다. 이때 사용된 데이터는 공분산이다. 즉, 각 데이터의 관계성 위주로 구했다는 거다. 숫자가 큰 값끼리 유사하다는 의미를 내포한다.(같은 성향)
+# ex) 0.49618136,  0.4693754 이 둘이 유사한 성향을 가진다.
+
 #        [-0.09551555, -0.33514122,  0.16243567,  0.44187529,  0.23760956,
 #         -0.0118904 ,  0.45261549, -0.25709321, -0.41093552, -0.33420413,
 #         -0.19285242,  0.08558777,  0.06544393],
@@ -285,12 +289,201 @@ pca1.components_
 #         -0.27057212, -0.12016446,  0.17854261, -0.20542092, -0.14759969,
 #          0.19318949, -0.75240742,  0.39085043]]
 
+# 해당 데이터를 dataframe으로 변경 후 엑셀로 export 하기
+pd.DataFrame(pca1.components_).to_excel("dataset/decom1.xlsx")
+
 # 각각의 분산값
 pca1.explained_variance_
 # [0.43637962, 0.10747217, 0.07678906, 0.04844739, 0.03404881]
+# 이 다섯개의 변수를 가지고는 70%도 안된다. 그래서 전체 100프로 중 작은 데이터만 설명하고 있다. PCA(n_components=5) 수를 올려주면 score가 올라간다.
+# 누적했을 때 90% 되는 시점을 components 개수로 정해주면 설명력을 가진다.
 
 # 다시 트레이닝용 x를 축약 기법에 적용하기 위해 변환한다.
 tr_xs5 = pca1.transform(tr_xs)
 
 tr_xs.shape   # 13개의 변수가 있을 때
 tr_xs5.shape  # 5개의 변수가 있을 때
+
+# 선형 회귀
+lm_model3 = LinearRegression()
+
+# 실행
+lm_model3.fit(tr_xs5, tr_y)
+
+# tr 만든 것과 같은 방식으로 변환
+te_xs5 = pca1.transform(te_xs)
+
+# 축약시킨 변수를 넣어준다.
+pred3 = lm_model3.predict(te_xs5)
+
+lm_model3.score(te_xs5, te_y)   # 0.570 (57%) 변수 선택 기법보다 작다.
+# 입력값 간의 관계성이 있다면 축약 기법이 좋다.
+
+mean_squared_error(te_y, pred3)   # 17.646
+
+
+# =============================================================================
+# chas: 범주형 데이터. 회귀는 무조건 수치형이라는 고정관념을 깨야 한다.
+# =============================================================================
+
+# chas: 0, 1 or 1, 2
+# y = a + 0.6*x1 + 0,3*x2 + 0.1*chas
+# 일 때 chas가 0이면 0.1*chas 앞의 식이 y를 형성하는 값이다.
+# chas가 1이라면 앞의 식에 0.1만 더해서 넘겨준다. 이때 0.1은 y에 영향을 주는 가중치가 된다.
+# chas가 2가 되면 0.1을 한 번 더 더해준 효과가 난다. chas가 바뀔 때마다 0.1의 비율만큼 넘겨주는 형태가 된다. 그룹의 특징이 반영되는 것이 아니라 0.1의 배수만큼 일정한 비율로 넘기는 것이다.
+# 하지만 chas가 0, 1, 2, 3...이라고 해서 실제 0배, 1배, 2배, 3배의 의미가 아니라 분별하기 위한 용도일 뿐이다. 
+# 만약 그룹의 특징을 넣어서 해당 변수가 들어갔을 때의 변동량을 구하는 식을 구하고 싶다면? 얘가 들어감으로 인해서 변동되는 가중치를 구해야 한다.
+# -> One-Hot 기법
+
+## One-Hot
+# label 수(0, 1, 2, 3...총 4개) 대로 변수를 만든다. d1=0, d2=1, d3=2, d4=3
+# 특정 변수에 1을 준다면 나머지는 모두 0으로 처리한다. d2에 1을 주면 d1, d3, d4는 0이 된다.
+# 각각의 가중치가 0.5, 0.2, 0.1, 0.1 이라면 0.5*0 + 0.2*1 + 0.1*0 + 0.1*0 이다.
+# 즉, 1이 들어간 변수를 제외하고는 모두 반영이 되지 않는다.
+
+
+# =============================================================================
+# dummy
+# =============================================================================
+
+# One-Hot에서 첫번째 열이 사라진 형태. 0.2*1 + 0.1*0 + 0.1*0
+
+survey = pd.read_csv("dataset/survey.csv")
+survey.dtypes
+# 데이터 타입 변경
+survey.Sex = survey.Sex.astype("category")
+# category 타입으로 변경됨
+survey.dtypes
+
+# one-hot 기법
+survey2 = pd.get_dummies(survey)
+# dummy 기법
+survey3 = pd.get_dummies(survey, drop_first=True)
+
+
+## 회귀식 만들기
+survey.columns.values
+x_list2 = ['Wr.Hnd', 'NW.Hnd', 'Exer', 'Pulse']
+
+survey4 = pd.get_dummies(survey[x_list2], drop_first=True)
+
+# na값이 있으므로 dropna()로 보정
+survey5 = survey4.dropna()
+
+lm_model_dum = LinearRegression()
+# 모든 행에 대해 0번부터 3번 전까지 Pulse 데이터 적용
+lm_model_dum.fit(survey5.drop(columns="Pulse"), survey5["Pulse"])
+
+# coef 값 출력
+lm_model_dum.coef_  # [ 1.44220748, -1.32426954,  4.33425855,  4.44479091]
+# intercept 값 출력
+lm_model_dum.intercept_   # 69.65 -> group 0이 포함된 값
+# 3번 그룹이 되는 순간 4.33을 더해주는 것이다.
+# pulse = 69.65 + 1.44*Wr.Hnd + -1.32*NW.Hnd + 4.33*Exer1 + 4.44*Exer2 일때
+# group 0: 69.65 + 1.44*Wr.Hnd + -1.32*NW.Hnd
+# group 1: 69.65 + 1.44*Wr.Hnd + -1.32*NW.Hnd + 4.33
+# group 2: 69.65 + 1.44*Wr.Hnd + -1.32*NW.Hnd + 4.44
+
+
+# =============================================================================
+# 분류 기법
+# =============================================================================
+
+Sonar = pd.read_csv("dataset/Sonar.csv")
+Sonar.head() # Class 열이 실제 y값이다. 암석인지 강석인지 60개의 센서가 체크한 값.
+Sonar.shape
+Sonar.columns
+
+# x와 y값 설정 
+xx = Sonar.drop(columns="Class")
+yy= Sonar["Class"]
+
+# 그룹별로 골고루 집어넣음 
+tr_x, te_x, tr_y, te_y = train_test_split(xx, yy, test_size=0.3, random_state=200)
+
+# KNN 패키지
+from sklearn.neighbors import KNeighborsClassifier
+
+# 이웃의 개수는 기본적으로 5개 되어있는데 분류기준이 명확하지 않으면 낮추는 것이 좋다.
+knn1 = KNeighborsClassifier(n_neighbors=3)
+
+# x는 이거고 y는 이거라고 지정하는 의미밖에 없음
+knn1.fit(tr_x, tr_y)
+
+# 그래서 test값으로 predict를 이용하면
+pred5 = knn1.predict_proba(te_x)
+#[[0.66666667, 0.33333333], -> 0.33이 두번 들어가서 0.66
+#       [1.        , 0.        ],
+#       [0.66666667, 0.33333333],
+#       [0.        , 1.        ],
+#       [0.        , 1.        ],
+
+knn1.score(te_x, te_y)  # 0.82(82%)
+
+
+# =============================================================================
+# 의사 결정 나무(Decision Tree): 중심값을 기준으로 작은 값/큰 값 가지를 친다.
+# 순수도: 이 조건을 따라 나누었을 때 기준이 될 수 있는 값을 찾는 것.
+# 수치형이면 평균을 기준으로 크다 작다를 나눈다.
+# 범주형이면 abc/bac/cab 등으로 그룹을 나누고 이 값을 기준으로 M과 R이 몇 개가 들어가있는지 개수를 센다. 내가 원하는 label, group으로 찾아주는 개념.
+# =============================================================================
+
+## Random Forest
+# 이미지 처리에 성능이 월등하다. decision tree의 확장형.
+
+from sklearn.tree import DecisionTreeClassifier
+
+dt1 = DecisionTreeClassifier()
+dt1.fit(tr_x, tr_y)
+
+pred6=dt1.predict(te_x)
+dt1.score(te_x, te_y)   # 0.841
+
+# 그래프로 보기
+from sklearn.tree import export_graphviz
+
+export_graphviz(dt1, "dataset/tree1.dot")
+
+# RandomForest
+from sklearn.ensemble import RandomForestClassifier
+
+# n_estimators를 올리면 score도 올라간다. 즉, 행의 수가 많을 수록 효과를 본다.
+rf = RandomForestClassifier(n_estimators=50)
+rf.fit(tr_x, tr_y)
+
+rf.score(te_x, te_y)  # 0.857, n_estimators=50일땐 0.873
+
+# 해당 인덱스의 decisionTree 값 접근
+rf.estimators_[4]
+
+
+# =============================================================================
+# 계층적 군집 분석
+# =============================================================================
+
+# 1. 거리(최단: single, 최장, 중앙값, 평균...etc)
+# 2. 연결 방법(거리를 나타내는 대표값에 따라 달라진다.)
+
+# 데이터 수가 많으면 한 눈에 볼 수가 없다. 마지막에 나오는 숫자만 보고 판단해야 한다.
+
+
+# =============================================================================
+# 비계층적 군집 분석(k-means)
+# =============================================================================
+
+# 1. 군집수를 먼저 지정한다.
+# 2. 난수에 의해 군집의 중심점이 구해진다.
+# 3. 내가 가진 데이터와 중심의 거리를 구한다.
+# 4. 가장 가까운 포인트들만 묶어 군집의 번호를 할당한다.
+# 5. 모인 데이터로 평균을 구한다.
+# 6. 처음의 난수보다 위치가 이동된다.
+# 7. 다시 재할당 한다.
+# 8. 위치 변화가 일어나지 않을 때까지 반복한다.
+# 9. 최적화 되면(최적의 거리를 구할때까지) 동일한 결과가 나온다.
+
+from sklearn.cluster import KMeans
+
+km = KMeans(n_clusters=3)
+
+# x값만 넣어주면 유사한 성향끼리 묶어준다. 비지도학습이라 y가 없다.
+km.fit_predict(tr_x)
